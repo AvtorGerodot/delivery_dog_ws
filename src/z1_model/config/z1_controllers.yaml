@@ -1,26 +1,43 @@
-controller_manager:
-  ros__parameters:
-    update_rate: 1000  # Hz — соответствует частоте Z1
+z1:
+  controller_manager:
+    ros__parameters:
+      update_rate: 1000  # Hz — соответствует частоте Z1
 
-    joint_state_broadcaster:
-      type: joint_state_broadcaster/JointStateBroadcaster
+      # РЕГИСТРАЦИЯ контроллеров — имя: тип
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
 
-    joint_trajectory_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
+      # joint_trajectory_controller:
+      #   type: joint_trajectory_controller/JointTrajectoryController
 
-joint_trajectory_controller:
-  ros__parameters:
-    joints:
-      - joint1
-      - joint2
-      - joint3
-      - joint4
-      - joint5
-      - joint6
-    command_interfaces:
-      - effort       # для динамического управления
-    state_interfaces:
-      - position
-      - velocity
-      - effort
-    open_loop_control: false
+      effort_controller:                          # <-- прямой torque control
+        type: forward_command_controller/ForwardCommandController
+
+  effort_controller:
+    ros__parameters:
+      joints:
+        - joint1
+        - joint2
+        - joint3
+        - joint4
+        - joint5
+        - joint6
+      interface_name: effort
+
+  # joint_trajectory_controller:
+  #   ros__parameters:
+  #     joints:
+  #       - joint1
+  #       - joint2
+  #       - joint3
+  #       - joint4
+  #       - joint5
+  #       - joint6
+  #     command_interfaces:
+  #       - effort
+  #     state_interfaces:
+  #       - position
+  #       - velocity
+  #       # - acceleration
+  #       # - effort
+  #     open_loop_control: false

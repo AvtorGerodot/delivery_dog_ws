@@ -44,7 +44,7 @@ def generate_launch_description():
         executable='create',
         arguments=[
             '-name', 'z1', 
-            '-topic', 'robot_description'
+            '-topic', '/z1/robot_description'
             ],
         output='screen'
     )
@@ -53,10 +53,37 @@ def generate_launch_description():
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
+        namespace='/z1', 
         parameters=[
             robot_description_param,
             {'use_sim_time': True}
         ]
+    )
+
+    # Запуск joint_state_broadcaster (публикует /joint_states)
+    joint_state_broadcaster = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster', '--controller-manager', '/z1/controller_manager'],
+        output='screen',
+        # parameters=[{'use_sim_time': True}]
+    )
+
+    # # Запуск контроллера управления
+    # joint_trajectory_controller = Node(
+    #     package='controller_manager',
+    #     executable='spawner',
+    #     arguments=['joint_trajectory_controller', '--controller-manager', '/z1/controller_manager'],
+    #     output='screen',
+    #     # parameters=[{'use_sim_time': True}]
+    # )
+
+    # Запуск контроллера прямого управления моментами
+    effort_controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['effort_controller', '--controller-manager', '/z1/controller_manager'],
+        output='screen'
     )
 
     # Мост Gazebo - ROS2
@@ -72,7 +99,10 @@ def generate_launch_description():
         start_gz_sim,
         gz_bridge,
         
-        robot_state_publisher, 
         z1_spawner, 
-        
+        robot_state_publisher, 
+        joint_state_broadcaster,
+        # joint_trajectory_controller,
+        effort_controller,
+
         ])

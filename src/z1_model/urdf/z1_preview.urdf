@@ -22,7 +22,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -31,7 +35,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -40,7 +48,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">-0.035</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -49,7 +61,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -58,7 +74,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -67,7 +87,11 @@
         <param name="min">-33</param>
         <param name="max">33</param>
       </command_interface>
-      <state_interface name="position"/>
+      <!-- <state_interface name="position"/> -->
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+        <!-- начальный угол, рад -->
+      </state_interface>
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
@@ -95,6 +119,35 @@
   <material name="iron_gold">
     <color rgba="1.00 0.84 0.00 1.0"/>
   </material>
+  <!-- <xacro:macro name="iron_red_material">
+        <material>
+            <ambient>0.45 0.03 0.03 1.0</ambient>   
+            <diffuse>0.80 0.06 0.06 1.0</diffuse>   
+            <specular>1.00 0.55 0.55 1.0</specular> 
+            <emissive>0.04 0.00 0.00 1.0</emissive> 
+            <pbr>
+                <metal>
+                    <metalness>0.85</metalness>  
+                    <roughness>0.15</roughness>  
+                </metal>
+            </pbr>
+        </material>
+    </xacro:macro>
+
+    <xacro:macro name="iron_gold_material">
+        <material>
+            <ambient>0.45 0.36 0.00 1.0</ambient>   
+            <diffuse>1.00 0.84 0.00 1.0</diffuse>   
+            <specular>1.00 1.00 0.55 1.0</specular> 
+            <emissive>0.04 0.03 0.00 1.0</emissive> 
+            <pbr>
+                <metal>
+                    <metalness>0.95</metalness> 
+                    <roughness>0.10</roughness> 
+                </metal>
+            </pbr>
+        </material>
+    </xacro:macro> -->
   <link name="world"/>
   <joint name="base_static_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -107,24 +160,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link00.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.36 0.00 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>1.00 0.84 0.00 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 1.00 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.03 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.95</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.10</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_gold"/>
     </visual>
     <collision>
@@ -153,24 +188,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link01.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.36 0.00 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>1.00 0.84 0.00 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 1.00 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.03 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.95</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.10</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_gold"/>
     </visual>
     <inertial>
@@ -193,24 +210,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link02.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.03 0.03 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>0.80 0.06 0.06 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 0.55 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.00 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.85</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.15</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_red"/>
     </visual>
     <collision>
@@ -251,24 +250,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link03.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.03 0.03 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>0.80 0.06 0.06 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 0.55 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.00 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.85</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.15</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_red"/>
     </visual>
     <collision>
@@ -303,24 +284,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link04.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.36 0.00 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>1.00 0.84 0.00 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 1.00 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.03 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.95</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.10</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_gold"/>
     </visual>
     <collision>
@@ -349,24 +312,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link05.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.03 0.03 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>0.80 0.06 0.06 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 0.55 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.00 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.85</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.15</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_red"/>
     </visual>
     <inertial>
@@ -389,24 +334,6 @@
       <geometry>
         <mesh filename="../meshes/visual/z1_Link06.dae" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.36 0.00 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>1.00 0.84 0.00 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 1.00 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.03 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.95</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.10</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_gold"/>
     </visual>
     <collision>
@@ -431,24 +358,6 @@
       <geometry>
         <mesh filename="../meshes/visual/stl_models/z1_GripperStator.stl" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.03 0.03 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>0.80 0.06 0.06 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 0.55 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.00 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.85</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.15</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_red"/>
     </visual>
     <collision>
@@ -475,24 +384,6 @@
       <geometry>
         <mesh filename="../meshes/visual/stl_models/z1_GripperMover.stl" scale="1 1 1"/>
       </geometry>
-      <material>
-        <ambient>0.45 0.36 0.00 1.0</ambient>
-        <!-- цвет в тени -->
-        <diffuse>1.00 0.84 0.00 1.0</diffuse>
-        <!-- основной цвет -->
-        <specular>1.00 1.00 0.55 1.0</specular>
-        <!-- зеркальный блик -->
-        <emissive>0.04 0.03 0.00 1.0</emissive>
-        <!-- слабое свечение -->
-        <pbr>
-          <metal>
-            <metalness>0.95</metalness>
-            <!-- 0=пластик, 1=металл -->
-            <roughness>0.10</roughness>
-            <!-- 0=зеркало, 1=матовый -->
-          </metal>
-        </pbr>
-      </material>
       <material name="iron_gold"/>
     </visual>
     <collision>

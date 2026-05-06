@@ -29,6 +29,7 @@
         <xacro:joint_controller name="joint4" initial_position="-1.047"/> <!-- примерно 60 градусов -->
         <xacro:joint_controller name="joint5" initial_position="0.0"/>
         <xacro:joint_controller name="joint6" initial_position="0.0"/>
+        <xacro:joint_controller name="jointGripper" initial_position="0.0"/>
 
     </ros2_control>
 

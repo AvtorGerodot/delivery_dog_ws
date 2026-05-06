@@ -23,7 +23,7 @@ def generate_launch_description():
 
     
     # настройки для gazebo
-    world_path = os.path.join(pkg_share, 'worlds', 'z1_world.sdf')
+    world_path = os.path.join(pkg_share, 'worlds', 'z1_cube_world.sdf')
     gz_launch_file = os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
     gz_bridge_params_file = os.path.join(pkg_share, 'config', 'gz_bridge_param.yaml')
 

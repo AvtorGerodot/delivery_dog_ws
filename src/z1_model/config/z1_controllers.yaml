@@ -22,6 +22,7 @@ z1:
         - joint4
         - joint5
         - joint6
+        - jointGripper
       interface_name: effort
 
   # joint_trajectory_controller:

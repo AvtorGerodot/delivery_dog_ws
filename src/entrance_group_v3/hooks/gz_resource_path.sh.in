@@ -1,0 +1,7 @@
+# Прокидывает путь к install/share в GZ_SIM_RESOURCE_PATH,
+# чтобы Gazebo Harmonic мог резолвить model://entrance_group_v3/...
+if [ -z "$GZ_SIM_RESOURCE_PATH" ]; then
+  export GZ_SIM_RESOURCE_PATH="@CMAKE_INSTALL_PREFIX@/share"
+else
+  export GZ_SIM_RESOURCE_PATH="@CMAKE_INSTALL_PREFIX@/share:$GZ_SIM_RESOURCE_PATH"
+fi

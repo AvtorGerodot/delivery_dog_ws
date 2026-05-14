@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!--
+  Xacro-макрос одной кнопки домофона.
+
+  Каждая кнопка состоит из ДВУХ звеньев:
+    * button_<idx>      - тело кнопки (серый пластик, квадратный box).
+                          Двигается prismatic-шарниром вглубь домофона.
+    * button_<idx>_cap  - тонкая накладка с цифрой/символом, жёстко прикреплённая
+                          к лицевой стороне кнопки. Текстура нанесена только сюда,
+                          поэтому никакие боковые грани кнопки не получают цифру.
+
+  Также генерируются:
+    * button_<idx>_joint  - prismatic, ход 0...3 мм, пружинный возврат.
+    * <gazebo> блок для пружины этого шарнира.
+    * <gazebo> блок с PBR-материалом для накладки (текстура с цифрой).
+    * <gazebo> блок с PBR-материалом для тела кнопки (общая пластиковая текстура).
+
+  Параметры:
+    idx          - числовой индекс кнопки (1..12) - попадает в имена звеньев.
+    label_name   - человекочитаемое имя для текстуры: "1".."9", "0", "star", "hash".
+                   Используется как basename для файла:
+                   model://entrance_group_v3/materials/textures/button_<label_name>.png
+    parent       - имя parent-звена (intercom_body).
+    xyz          - позиция тела кнопки в системе parent (string "x y z").
+    bx, by, bz   - размер тела кнопки по осям X/Y/Z, в метрах
+                   (по умолчанию 8x10x10 мм: bx = глубина внутрь домофона, by/bz = фасад).
+                   Разделены на 3 параметра вместо одной строки "x y z",
+                   чтобы файл был совместим с JS-парсерами xacro
+                   (URDF Visualiser в VS Code и др.), которые не поддерживают
+                   Python-методы строк (.split() и др.).
+    cap_thickness - толщина накладки (по умолчанию 0.5 мм).
+    travel       - максимальный ход кнопки в м (по умолчанию 0.003 = 3 мм).
+    spring_k     - жёсткость возвратной пружины Н/м (по умолчанию 500).
+    damping      - демпфирование шарнира (по умолчанию 3.0).
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="bx" value="0.008"/>
+  <xacro:property name="by" value="0.010"/>
+  <xacro:property name="bz" value="0.010"/>
+  <xacro:property name="cap_thickness"  value="0.0005"/>
+  <xacro:property name="travel"         value="0.003"/>
+  <xacro:property name="spring_k"       value="500.0"/>
+  <xacro:property name="damping"        value="3.0"/>
+  
+
+  <xacro:macro name="intercom_button"
+               params="button_name parent xyz">
+
+    <!-- ====== 1. Тело кнопки ====== -->
+    <link name="button_${button_name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${bx} ${by} ${bz}"/>
+          <!-- <mesh filename="package://entrance_group_v3/materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
+          <!-- <mesh filename="../materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
+          <!-- <mesh filename="$(find entrance_group_v3)/materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
+          
+        </geometry>
+        <material name="button_${button_name}_body_mat">
+          <color rgba="0.88 0.86 0.82 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${bx} ${by} ${bz}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.005"/>
+        <inertia ixx="1e-7" ixy="0" ixz="0"
+                 iyy="1e-7" iyz="0" izz="1e-7"/>
+      </inertial>
+    </link>
+
+    <!-- ====== 2. Призматический шарнир ======
+         Кнопка установлена на лицевой грани домофона (+X), её собственная
+         нулевая позиция = "не нажата". Ход = вглубь домофона, т.е. в -X.
+         Origin xyz передаётся как параметр макроса. -->
+    <joint name="button_${button_name}_joint" type="prismatic">
+      <parent link="${parent}"/>
+      <child link="button_${button_name}"/>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+      <axis xyz="-1 0 0"/>
+      <limit lower="0" upper="${travel}" effort="20" velocity="0.1"/>
+      <dynamics damping="${damping}" friction="0.1"/>
+    </joint>
+
+    <!-- SDF-расширение: пружинный возврат + упор хода. -->
+    <gazebo reference="button_${button_name}_joint">
+      <axis>
+        <dynamics>
+          <damping>${damping}</damping>
+          <friction>0.1</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>${spring_k}</spring_stiffness>
+        </dynamics>
+      </axis>
+      <provideFeedback>true</provideFeedback>
+    </gazebo>
+
+    <!-- ====== 3. Накладка с цифрой/символом ======
+         Тонкий box, прижатый к ЛИЦЕВОЙ грани кнопки (+X относительно тела).
+         Размеры на 0.5 мм меньше тела, чтобы получился аккуратный кант.
+         Накладка получает PBR-текстуру с цифрой. -->
+    <link name="button_${button_name}_cap">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <!-- -0.0005 -->
+          <box size="${cap_thickness} ${by} ${bz}"/>
+        </geometry>
+        <material name="button_${button_name}_cap_mat">
+          <color rgba="0.95 0.94 0.90 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${cap_thickness} ${by - 0.0005} ${bz - 0.0005}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.0005"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0"
+                 iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+    </link>
+
+    <joint name="button_${button_name}_cap_fixed" type="fixed">
+      <parent link="button_${button_name}"/>
+      <child link="button_${button_name}_cap"/>
+      <origin xyz="${bx/2.0 + cap_thickness/2.0} 0 0"
+              rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="button_${button_name}_cap_fixed">
+      <preserveFixedJoint>true</preserveFixedJoint>
+      <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
+
+    <!-- ====== 4. PBR-текстура накладки (только тут есть цифра) ====== -->
+    <gazebo reference="button_${button_name}_cap">
+      <visual>
+        <material>
+          <pbr>
+            <metal>
+              <diffuse>1 1 1 1</diffuse>
+              <albedo_map>model://entrance_group_v3/materials/textures/button_${button_name}.png</albedo_map>
+              <metalness>0.0</metalness>
+              <roughness>0.45</roughness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+      <!-- <visual><material><pbr><metal><albedo_map>model://entrance_group_v3/materials/textures/button_1.png</albedo_map><metalness>0.0</metalness><roughness>0.4</roughness></metal></pbr></material></visual> -->
+    </gazebo>
+
+    <!-- ====== 5. PBR-материал тела кнопки (без цифры, общая текстура пластика) ====== -->
+    <gazebo reference="button_${button_name}">
+      <visual>
+        <material>
+          <diffuse>1 1 1 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://entrance_group_v3/materials/textures/button_body.png</albedo_map>
+              <metalness>0.0</metalness>
+              <roughness>0.55</roughness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

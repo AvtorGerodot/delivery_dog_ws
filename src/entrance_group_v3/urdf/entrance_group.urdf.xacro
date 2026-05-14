@@ -1,0 +1,337 @@
+<?xml version="1.0"?>
+<!--
+  Главный xacro-файл входной группы (entrance_group_v3).
+
+  Система координат МОДЕЛИ:
+      +X - условно "внутрь подъезда" (домофон висит на стороне -X)
+      +Y - влево если смотреть со стороны -X (с улицы)
+      +Z - вверх
+
+  При спавне в Gazebo рекомендуется задавать yaw=pi (180°), тогда
+  ось -X модели совпадёт с +X мира, и наблюдатель Gazebo (стандартная
+  камера со стороны +X мира) окажется СНАРУЖИ подъезда. См. launch-файл.
+
+  Дверь:
+      - открывается ВНУТРЬ подъезда (т.е. в направлении +X в системе модели);
+      - петли СЛЕВА (Y = +0.45 в системе модели);
+      - наружная грань двери лежит в одной плоскости с НАРУЖНОЙ стороной стены
+        (X = -0.1), т.е. дверь "вровень со стеной, на которой домофон".
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="entrance_group_v3">
+
+  <!-- Подключаем макрос кнопки -->
+  <!-- $(find entrance_group_v3)/urdf/ -->
+  <xacro:include filename="button_macro.xacro"/>
+
+  <!-- =====================================================
+       Свойства (легко править размеры из одного места)
+       ===================================================== -->
+  <xacro:property name="wall_thickness" value="0.2"/>
+  <xacro:property name="wall_height"    value="2.5"/>
+  <xacro:property name="opening_width"  value="0.9"/>
+  <xacro:property name="opening_height" value="2.1"/>
+  <xacro:property name="wall_side_w"    value="1.05"/>  <!-- ширина бокового сегмента стены -->
+  <xacro:property name="wall_top_h"     value="0.4"/>   <!-- высота перемычки -->
+
+  <xacro:property name="door_w"  value="0.9"/>
+  <xacro:property name="door_h"  value="2.1"/>
+  <xacro:property name="door_th" value="0.04"/>
+
+  <!-- Сдвиг центра двери по X так, чтобы её НАРУЖНАЯ грань (со стороны -X)
+       совпала с наружной плоскостью стены (X = -wall_thickness/2 = -0.1). -->
+  <xacro:property name="door_x_center" value="${-wall_thickness/2.0 + door_th/2.0}"/>
+
+
+  <link name="world"/>
+
+  <!-- =====================================================
+       Стена (4 сегмента + пол)
+       ===================================================== -->
+  <xacro:macro name="wall_block" params="name xyz size">
+    <link name="${name}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="${size}"/></geometry>
+        <material name="wall_grey"><color rgba="0.75 0.73 0.70 1.0"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="${size}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="200"/>
+        <inertia ixx="50" ixy="0" ixz="0" iyy="50" iyz="0" izz="50"/>
+      </inertial>
+    </link>
+    <joint name="${name}_fixed" type="fixed">
+      <parent link="floor"/>
+      <child link="${name}"/>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+    </joint>
+    <gazebo reference="${name}">
+      <visual>
+        <material>
+          <diffuse>1 1 1 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://entrance_group_v3/materials/textures/wall_albedo.png</albedo_map>
+              <metalness>0.0</metalness>
+              <roughness>0.85</roughness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:wall_block name="wall_left"  xyz="0  0.975 1.25" size="0.2 1.05 2.5"/>
+  <xacro:wall_block name="wall_right" xyz="0 -0.975 1.25" size="0.2 1.05 2.5"/>
+  <xacro:wall_block name="wall_top"   xyz="0  0     2.3"  size="0.2 0.9  0.4"/>
+
+  <!-- Пол -->
+  <link name="floor">
+    <visual>
+      <geometry><box size="2.0 3.0 0.005"/></geometry>
+      <material name="floor_dark"><color rgba="0.3 0.3 0.3 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="2.0 3.0 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="100"/>
+      <inertia ixx="10" ixy="0" ixz="0" iyy="10" iyz="0" izz="10"/>
+    </inertial>
+  </link>
+  <joint name="floor_fixed" type="fixed">
+    <parent link="world"/>
+    <child link="floor"/>
+    <origin xyz="0 0 0.0025" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="floor">
+    <visual>
+      <material>
+        <pbr><metal>
+          <albedo_map>model://entrance_group_v3/materials/textures/floor_albedo.png</albedo_map>
+          <metalness>0.0</metalness><roughness>0.7</roughness>
+        </metal></pbr>
+      </material>
+    </visual>
+  </gazebo>
+
+  <!-- =====================================================
+       Дверь
+       Петли СЛЕВА (Y = +0.45). Открывается ВНУТРЬ подъезда (+X).
+       ===================================================== -->
+  <link name="door">
+    <visual>
+      <!-- Центр двери смещён на -door_w/2 = -0.45 по Y относительно шарнира (петля слева).
+           По X центр в door_x_center (вровень с наружной стороной стены). -->
+      <origin xyz="${-door_th / 2} -0.45 0" rpy="0 0 0"/>
+      <geometry><box size="${door_th} ${door_w} ${door_h}"/></geometry>
+      <material name="door_dark"><color rgba="0.15 0.15 0.17 1.0"/></material>
+    </visual>
+    <collision>
+      <origin xyz="${door_x_center} -0.45 0" rpy="0 0 0"/>
+      <geometry><box size="${door_th} ${door_w} ${door_h}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="${door_x_center} -0.45 0" rpy="0 0 0"/>
+      <mass value="25.0"/>
+      <inertia ixx="9.20" ixy="0" ixz="0" iyy="0.083" iyz="0" izz="9.20"/>
+    </inertial>
+  </link>
+
+  <joint name="door_hinge" type="revolute">
+    <parent link="floor"/>
+    <child link="door"/>
+    <!-- Точка шарнира (петля): X=0 (в плоскости стены, нейтрально), Y=+0.45 (слева), Z=1.05. -->
+    <origin xyz="${-door_x_center + door_th / 2} 0.45 1.05" rpy="0 0 0"/>
+    <!-- Ось Z. Открывается ВНУТРЬ подъезда => кромка с ручкой движется в +X.
+         С петлёй слева (Y=+0.45) для движения свободной кромки (Y=-0.9) в +X
+         нужен ПОЛОЖИТЕЛЬНЫЙ угол по оси +Z. -->
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="1.57" effort="100" velocity="2.0"/>
+    <dynamics damping="3.0" friction="1.5"/>
+  </joint>
+
+  <!-- Пружина-доводчик двери -->
+  <gazebo reference="door_hinge">
+    <axis>
+      <dynamics>
+        <damping>3.0</damping>
+        <friction>1.5</friction>
+        <spring_reference>0</spring_reference>
+        <spring_stiffness>8.0</spring_stiffness>
+      </dynamics>
+    </axis>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+
+  <!-- PBR-текстура двери: тёмный крашеный металл -->
+  <!-- <gazebo reference="door">
+    <visual>
+      <material>
+        <diffuse>1 1 1 1</diffuse>
+        <specular>0.3 0.3 0.3 1</specular>
+        <pbr>
+          <metal>
+            <albedo_map>model://entrance_group_v3/materials/textures/door_albedo.png</albedo_map>
+            <metalness>0.6</metalness>
+            <roughness>0.35</roughness>
+          </metal>
+        </pbr>
+      </material>
+    </visual>
+  </gazebo> -->
+
+  <!-- =====================================================
+       Ручка двери (вертикальный цилиндр, статичная)
+       ===================================================== -->
+  <link name="door_handle">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.0125" length="0.3"/></geometry>
+      <material name="handle_steel">
+        <!-- <color rgba="0.78 0.78 0.82 1.0"/> -->
+        <color rgba="0.68 0.68 0.72 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.0125" length="0.3"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0024" ixy="0" ixz="0" iyy="0.0024" iyz="0" izz="2.3e-5"/>
+    </inertial>
+  </link>
+
+  <joint name="door_handle_fixed" type="fixed">
+    <parent link="door"/>
+    <child link="door_handle"/>
+    <!-- Ручка на расстоянии 80 мм от правой (свободной) кромки двери (Y=-0.82).
+         X смещаем относительно центра двери на -door_th/2 - 0.0125 (наружная сторона + радиус ручки).
+         Z = 0.05 м выше центра двери. -->
+    <origin xyz="${door_th / 2.0 + 0.0125} -0.82 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="door_handle_fixed">
+    <preserveFixedJoint>true</preserveFixedJoint>
+    <disableFixedJointLumping>true</disableFixedJointLumping>
+  </gazebo>
+
+  <!-- <gazebo reference="door_handle">
+    <visual>
+      <material>
+        <diffuse>1 1 1 1</diffuse>
+        <pbr>
+          <metal>
+            <albedo_map>model://entrance_group_v3/materials/textures/handle_albedo.png</albedo_map>
+            <metalness>0.15</metalness>
+            <roughness>0.18</roughness>
+          </metal>
+        </pbr>
+      </material>
+    </visual>
+  </gazebo> -->
+
+  <!-- =====================================================
+       Домофон
+       ===================================================== -->
+  <link name="intercom_body">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="0.05 0.15 0.25"/></geometry>
+      <material name="intercom_dark"><color rgba="0.13 0.13 0.16 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.05 0.15 0.25"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.5"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.008" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+
+  <joint name="intercom_body_fixed" type="fixed">
+    <parent link="floor"/>
+    <child link="intercom_body"/>
+    <!-- Домофон висит на НАРУЖНОЙ стороне стены (X = -wall_thickness/2 - depth/2 = -0.125),
+         справа от двери в системе модели (Y = -0.75), высота 1.5 м. -->
+    <origin xyz="0.125 -0.75 1.5" rpy="0 0 0"/>
+  </joint>
+
+  <!-- <gazebo reference="intercom_body">
+    <visual>
+      <material>
+        <pbr><metal>
+          <albedo_map>model://entrance_group_v3/materials/textures/intercom_albedo.png</albedo_map>
+          <metalness>0.15</metalness><roughness>0.55</roughness>
+        </metal></pbr>
+      </material>
+    </visual>
+  </gazebo> -->
+  <gazebo reference="intercom_body">
+    <visual>
+      <material>
+        <diffuse>1 1 1 1</diffuse>
+        <pbr>
+          <metal>
+            <albedo_map>model://entrance_group_v3/materials/textures/intercom_albedo.png</albedo_map>
+            <metalness>0.1</metalness>
+            <roughness>0.5</roughness>
+          </metal>
+        </pbr>
+      </material>
+    </visual>
+  </gazebo>
+
+  <!-- =====================================================
+       КНОПКИ ДОМОФОНА (12 шт., через xacro-макрос)
+       ====================================================
+       Координаты ЛОКАЛЬНЫЕ относительно intercom_body.
+       Ось +X intercom_body направлена ОТ стены наружу,
+       значит лицевая грань - это X = +0.025 (полу-толщина 0.05 / 2).
+       Кнопки выступают вперёд на bx/2 = 0.004 м, итого origin.x = 0.029.
+
+       Раскладка телефонной клавиатуры (как видит её человек,
+       СТОЯЩИЙ ПЕРЕД ДОМОФОНОМ):
+
+           1  2  3
+           4  5  6
+           7  8  9
+           *  0  #
+
+       Эмпирически проверено на скриншоте v2: для зрителя, стоящего перед
+       домофоном, ПОЛОЖИТЕЛЬНОЕ Y модели оказывается СПРАВА.
+       Поэтому "1" (левая верхняя для зрителя) должна быть в Y=-0.018,
+       "3" - в Y=+0.018. Верхний ряд: Z МАКС положительная.
+       Шаг кнопок: 18 мм по Y, 22 мм по Z.
+
+       КООРДИНАТЫ (X фиксирован = 0.029, локально от intercom_body):
+         ряд 1 (Z=+0.013): 1=Y(-0.018), 2=Y(0), 3=Y(+0.018)
+         ряд 2 (Z=-0.009): 4=Y(-0.018), 5=Y(0), 6=Y(+0.018)
+         ряд 3 (Z=-0.031): 7=Y(-0.018), 8=Y(0), 9=Y(+0.018)
+         ряд 4 (Z=-0.053): *=Y(-0.018), 0=Y(0), #=Y(+0.018)
+  -->
+
+  <!-- Ряд 1: 1 2 3 (верхний) -->
+  <xacro:intercom_button button_name="1" parent="intercom_body" xyz="0.029 -0.018  0.013"/>
+  <xacro:intercom_button button_name="2" parent="intercom_body" xyz="0.029  0.000  0.013"/>
+  <xacro:intercom_button button_name="3" parent="intercom_body" xyz="0.029  0.018  0.013"/>
+  <!-- Ряд 2: 4 5 6 -->
+  <xacro:intercom_button button_name="4" parent="intercom_body" xyz="0.029 -0.018 -0.009"/>
+  <xacro:intercom_button button_name="5" parent="intercom_body" xyz="0.029  0.000 -0.009"/>
+  <xacro:intercom_button button_name="6" parent="intercom_body" xyz="0.029  0.018 -0.009"/>
+  <!-- Ряд 3: 7 8 9 -->
+  <xacro:intercom_button button_name="7" parent="intercom_body" xyz="0.029 -0.018 -0.031"/>
+  <xacro:intercom_button button_name="8" parent="intercom_body" xyz="0.029  0.000 -0.031"/>
+  <xacro:intercom_button button_name="9" parent="intercom_body" xyz="0.029  0.018 -0.031"/>
+  <!-- Ряд 4: * 0 # (нижний) -->
+  <xacro:intercom_button button_name="star" parent="intercom_body" xyz="0.029 -0.018 -0.053"/>
+  <xacro:intercom_button button_name="0"    parent="intercom_body" xyz="0.029  0.000 -0.053"/>
+  <xacro:intercom_button button_name="hash" parent="intercom_body" xyz="0.029  0.018 -0.053"/>
+
+  <!-- <xacro:include filename="buts.xacro"/> -->
+
+</robot>

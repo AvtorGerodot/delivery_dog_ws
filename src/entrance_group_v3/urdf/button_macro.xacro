@@ -3,35 +3,8 @@
   Xacro-макрос одной кнопки домофона.
 
   Каждая кнопка состоит из ДВУХ звеньев:
-    * button_<idx>      - тело кнопки (серый пластик, квадратный box).
-                          Двигается prismatic-шарниром вглубь домофона.
-    * button_<idx>_cap  - тонкая накладка с цифрой/символом, жёстко прикреплённая
-                          к лицевой стороне кнопки. Текстура нанесена только сюда,
-                          поэтому никакие боковые грани кнопки не получают цифру.
-
-  Также генерируются:
-    * button_<idx>_joint  - prismatic, ход 0...3 мм, пружинный возврат.
-    * <gazebo> блок для пружины этого шарнира.
-    * <gazebo> блок с PBR-материалом для накладки (текстура с цифрой).
-    * <gazebo> блок с PBR-материалом для тела кнопки (общая пластиковая текстура).
-
-  Параметры:
-    idx          - числовой индекс кнопки (1..12) - попадает в имена звеньев.
-    label_name   - человекочитаемое имя для текстуры: "1".."9", "0", "star", "hash".
-                   Используется как basename для файла:
-                   model://entrance_group_v3/materials/textures/button_<label_name>.png
-    parent       - имя parent-звена (intercom_body).
-    xyz          - позиция тела кнопки в системе parent (string "x y z").
-    bx, by, bz   - размер тела кнопки по осям X/Y/Z, в метрах
-                   (по умолчанию 8x10x10 мм: bx = глубина внутрь домофона, by/bz = фасад).
-                   Разделены на 3 параметра вместо одной строки "x y z",
-                   чтобы файл был совместим с JS-парсерами xacro
-                   (URDF Visualiser в VS Code и др.), которые не поддерживают
-                   Python-методы строк (.split() и др.).
-    cap_thickness - толщина накладки (по умолчанию 0.5 мм).
-    travel       - максимальный ход кнопки в м (по умолчанию 0.003 = 3 мм).
-    spring_k     - жёсткость возвратной пружины Н/м (по умолчанию 500).
-    damping      - демпфирование шарнира (по умолчанию 3.0).
+    * button_${button_name}      - тело кнопки (серый пластик, квадратный box). Двигается prismatic-шарниром вглубь домофона.
+    * button_${button_name}_cap  - тонкая накладка с цифрой/символом, жёстко прикреплённая к лицевой стороне кнопки. Текстура нанесена только сюда
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -53,9 +26,6 @@
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
           <box size="${bx} ${by} ${bz}"/>
-          <!-- <mesh filename="package://entrance_group_v3/materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
-          <!-- <mesh filename="../materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
-          <!-- <mesh filename="$(find entrance_group_v3)/materials/button_0.obj" scale="1.0 1.0 1.0"/> -->
           
         </geometry>
         <material name="button_${button_name}_body_mat">
@@ -136,6 +106,7 @@
               rpy="0 0 0"/>
     </joint>
 
+    <!-- gazebo-разделитель, чтобы текстура родителя не переходила на дочерние fixed-элементы -->
     <gazebo reference="button_${button_name}_cap_fixed">
       <preserveFixedJoint>true</preserveFixedJoint>
       <disableFixedJointLumping>true</disableFixedJointLumping>
@@ -155,7 +126,6 @@
           </pbr>
         </material>
       </visual>
-      <!-- <visual><material><pbr><metal><albedo_map>model://entrance_group_v3/materials/textures/button_1.png</albedo_map><metalness>0.0</metalness><roughness>0.4</roughness></metal></pbr></material></visual> -->
     </gazebo>
 
     <!-- ====== 5. PBR-материал тела кнопки (без цифры, общая текстура пластика) ====== -->

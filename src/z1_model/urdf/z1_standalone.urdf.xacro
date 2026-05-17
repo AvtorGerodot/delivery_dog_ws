@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+  Standalone-сборка Z1 поверх МАКРОСА z1_arm.
+  Аналог старого z1_model.urdf.xacro, но через макрос - чтобы было видно,
+  что та же логика теперь применима и в composite-моделях.
+
+  Запускать так же, как раньше:
+      ros2 launch z1_model z1_model.launch.py
+  (запуск-файл z1_model.launch.py продолжает использовать z1_model.urdf.xacro
+   - старая логика тоже работает; этот файл - альтернатива).
+-->
+<robot name="z1_model" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="z1_arm_macro.urdf.xacro"/>
+  <xacro:arg name="UnitreeGripper" default="true"/>
+
+  <!-- "Земля" для standalone-режима -->
+  <link name="world"/>
+
+  <!-- Z1 крепится к world (как и в старом файле) -->
+  <xacro:z1_arm prefix=""
+                parent="world"
+                xyz="0 0 0" rpy="0 0 0"
+                use_gripper="$(arg UnitreeGripper)"/>
+
+  <!-- Блок ros2_control + плагин gz_ros2_control. В standalone их можно
+       подключать прямо здесь, так как других контроллеров в модели нет. -->
+  <xacro:z1_ros2_control prefix="" use_gripper="$(arg UnitreeGripper)"/>
+
+  <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin"
+            filename="gz_ros2_control-system">
+      <parameters>$(find z1_model)/config/z1_controllers.yaml</parameters>
+      <ros>
+        <namespace>/z1</namespace>
+      </ros>
+    </plugin>
+  </gazebo>
+
+</robot>

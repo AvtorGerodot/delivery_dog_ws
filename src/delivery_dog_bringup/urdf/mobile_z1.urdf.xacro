@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+  Composite: мобильная mecanum-платформа + манипулятор Z1.
+
+  В этой версии:
+  * базой управляет ВСТРОЕННЫЙ плагин gz_sim::MecanumDrive (cmd_vel в GZ).
+  * Z1 управляется через gz_ros2_control + effort_controller.
+
+  Два плагина мирно сосуществуют в одной SDF-модели.
+
+  Аргументы:
+    controllers_yaml - АБСОЛЮТНЫЙ путь к yaml для gz_ros2_control (Z1).
+                       Передаётся из launch-файла; $(find ...) в SDF не работает.
+    namespace        - namespace для gz_ros2_control (контроллеров Z1).
+    cmd_vel_topic    - GZ-топик для команд платформе (по умолчанию cmd_vel).
+                       Через ros_gz_bridge тот же топик доступен из ROS2.
+-->
+<robot name="mobile_z1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="default_mount_height"  value="0.14"/>
+
+  <xacro:arg name="controllers_yaml" default="/tmp/mobile_z1_controllers.yaml"/>
+  <xacro:arg name="namespace"        default="/robot"/>
+  <xacro:arg name="cmd_vel_topic"    default="cmd_vel"/>
+
+  <!-- 1. Платформа -->
+  <xacro:include filename="$(find mobile_base_model)/urdf/mobile_base_macro.urdf.xacro"/>
+  <xacro:mobile_base prefix="" mount_height="${default_mount_height}"/>
+
+  <!-- 2. Z1 на крышке -->
+  <xacro:include filename="$(find z1_model)/urdf/z1_arm_macro.urdf.xacro"/>
+  <xacro:z1_arm prefix=""
+                parent="z1_mount"
+                xyz="0 0 ${default_mount_height / 2.0}" rpy="0 0 0"
+                use_gripper="true"/>
+
+  <!-- 3. ros2_control блок ТОЛЬКО для Z1 (без mobile_base_ros2_control) -->
+  <xacro:z1_ros2_control prefix="" use_gripper="true" name="Z1Hardware"/>
+
+  <!-- 4. gz_ros2_control: 7 джойнтов Z1 -->
+  <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin"
+            filename="gz_ros2_control-system">
+      <parameters>$(arg controllers_yaml)</parameters>
+      <ros>
+        <namespace>$(arg namespace)</namespace>
+      </ros>
+    </plugin>
+  </gazebo>
+
+  <!-- 5. MecanumDrive для платформы -->
+  <xacro:mecanum_drive_plugin
+      prefix=""
+      topic="$(arg cmd_vel_topic)"
+      odom_topic="odom"
+      tf_topic="tf"
+      frame_id="odom"
+      child_frame_id="base_footprint"/>
+
+</robot>

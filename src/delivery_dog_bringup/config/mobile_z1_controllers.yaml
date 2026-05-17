@@ -1,0 +1,27 @@
+# Контроллеры для composite-модели mobile_z1.
+# В этой версии управление шасси отдано встроенному плагину
+# gz_sim::MecanumDrive (вне ros2_control), поэтому здесь остаются
+# только контроллеры для Z1.
+
+/robot:
+  controller_manager:
+    ros__parameters:
+      update_rate: 1000  # Hz
+
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+
+      effort_controller:
+        type: forward_command_controller/ForwardCommandController
+
+  effort_controller:
+    ros__parameters:
+      joints:
+        - joint1
+        - joint2
+        - joint3
+        - joint4
+        - joint5
+        - joint6
+        - jointGripper
+      interface_name: effort

@@ -1,0 +1,19 @@
+/mobile_base:
+  controller_manager:
+    ros__parameters:
+      update_rate: 200  # Hz
+
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+
+      wheels_velocity_controller:
+        type: velocity_controllers/JointGroupVelocityController
+
+  wheels_velocity_controller:
+    ros__parameters:
+      joints:
+        - wheel_fl_joint
+        - wheel_fr_joint
+        - wheel_rl_joint
+        - wheel_rr_joint
+      interface_name: velocity

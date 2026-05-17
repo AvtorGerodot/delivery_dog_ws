@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mobile_base_model</name>
+  <version>0.1.0</version>
+  <description>
+    URDF/Xacro модель временной мобильной платформы (4-колёсное mecanum-шасси)
+    для симуляции бакалаврского диплома "Unitree B2 + Z1 у подъезда".
+    Платформа заменяет квадрупеда B2 и предоставляет верхнее крепление (z1_mount)
+    для манипулятора Z1. Подключается как xacro:макрос к bringup-пакету.
+  </description>
+  <maintainer email="sgerget74@gmail.com">Avtor Gerodot</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>ros2_control</exec_depend>
+  <exec_depend>ros2_controllers</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>velocity_controllers</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

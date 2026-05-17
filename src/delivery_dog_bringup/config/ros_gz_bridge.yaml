@@ -1,0 +1,38 @@
+# Общий мост ROS2 <-> Gazebo.
+
+# Часы
+- ros_topic_name: "clock"
+  gz_topic_name: "clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+
+# /cmd_vel: ROS -> GZ, чтобы публиковать в платформу из любых ROS2-узлов
+# (rqt_robot_steering, teleop_twist_keyboard, rl-агент и т.п.).
+# Плагин gz_sim::MecanumDrive слушает этот GZ-топик и применяет силы.
+- ros_topic_name: "cmd_vel"
+  gz_topic_name: "cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+# Одометрия платформы из GZ в ROS2
+- ros_topic_name: "odom"
+  gz_topic_name: "odom"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
+
+# TF из GZ в ROS2 (одометрия публикует odom -> base_footprint)
+- ros_topic_name: "tf"
+  gz_topic_name: "tf"
+  ros_type_name: "tf2_msgs/msg/TFMessage"
+  gz_type_name: "gz.msgs.Pose_V"
+  direction: GZ_TO_ROS
+
+# JointState входной группы (из тэга <publish_joint_state> в SDF)
+- ros_topic_name: "/entrance/joint_states"
+  gz_topic_name: "/world/delivery_world/model/entrance_group_v3/joint_state"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS

@@ -24,7 +24,8 @@ setup(
     # },
     entry_points={
         'console_scripts': [
-            'dynamics_control_node = dynamic_control_py.dynamic_control_node:main',
+            'hw_dynamic_control = dynamic_control_py.hw_dynamic_control:main',
+            'dynamic_control_node = dynamic_control_py.dynamic_control_node:main',
         ],
     },
 )

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <!--
   Standalone-сборка одной только мобильной платформы (без Z1).
-  Использует встроенный плагин gz_sim::MecanumDrive (а не ros2_control)
-  для управления через /cmd_vel.
+  Использует gz_sim::VelocityControl + gz_sim::OdometryPublisher
+  для управления через /cmd_vel и публикации одометрии.
 
   ВНИМАНИЕ: топик cmd_vel здесь - это GZ-топик. Чтобы публиковать в него
   из ROS2, нужен ros_gz_bridge (он же поднимается в launch).
@@ -13,9 +13,8 @@
 
   <xacro:mobile_base prefix=""/>
 
-  <!-- Кинематика mecanum через встроенный плагин Gazebo.
-       Топик GZ /cmd_vel пробрасывается в ROS2 через ros_gz_bridge в launch. -->
-  <xacro:mecanum_drive_plugin
+  <!-- Кинематический drive через встроенные плагины Gazebo. -->
+  <xacro:velocity_control_plugin
       prefix=""
       topic="cmd_vel"
       odom_topic="odom"

@@ -48,13 +48,13 @@ class CTCController(Node):
 
         self.sub = self.create_subscription(
             JointState,
-            '/robot/joint_states',
+            '/z1/joint_states',
             self.joint_states_cb,
             10
         )
         self.pub = self.create_publisher(
             Float64MultiArray,
-            '/robot/effort_controller/commands',
+            '/z1/effort_controller/commands',
             10
         )
 

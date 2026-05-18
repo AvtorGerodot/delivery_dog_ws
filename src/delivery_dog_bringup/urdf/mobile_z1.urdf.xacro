@@ -1,19 +1,20 @@
 <?xml version="1.0"?>
 <!--
-  Composite: мобильная mecanum-платформа + манипулятор Z1.
+  Composite: мобильная платформа (кинематический режим) + Z1.
 
   В этой версии:
-  * базой управляет ВСТРОЕННЫЙ плагин gz_sim::MecanumDrive (cmd_vel в GZ).
-  * Z1 управляется через gz_ros2_control + effort_controller.
+    * базой управляет gz_sim::VelocityControl (cmd_vel напрямую в скорость
+      base_link). Никаких MecanumDrive, никаких ros2_control для колёс.
+    * Z1 управляется через gz_ros2_control + effort_controller.
+    * Одометрия публикуется через gz_sim::OdometryPublisher.
 
-  Два плагина мирно сосуществуют в одной SDF-модели.
+  Два плагина для Z1 (ros2_control) и для базы (VelocityControl + Odometry)
+  мирно сосуществуют в одной SDF-модели.
 
   Аргументы:
     controllers_yaml - АБСОЛЮТНЫЙ путь к yaml для gz_ros2_control (Z1).
-                       Передаётся из launch-файла; $(find ...) в SDF не работает.
     namespace        - namespace для gz_ros2_control (контроллеров Z1).
     cmd_vel_topic    - GZ-топик для команд платформе (по умолчанию cmd_vel).
-                       Через ros_gz_bridge тот же топик доступен из ROS2.
 -->
 <robot name="mobile_z1" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -34,7 +35,7 @@
                 xyz="0 0 ${default_mount_height / 2.0}" rpy="0 0 0"
                 use_gripper="true"/>
 
-  <!-- 3. ros2_control блок ТОЛЬКО для Z1 (без mobile_base_ros2_control) -->
+  <!-- 3. ros2_control блок ТОЛЬКО для Z1 -->
   <xacro:z1_ros2_control prefix="" use_gripper="true" name="Z1Hardware"/>
 
   <!-- 4. gz_ros2_control: 7 джойнтов Z1 -->
@@ -48,8 +49,8 @@
     </plugin>
   </gazebo>
 
-  <!-- 5. MecanumDrive для платформы -->
-  <xacro:mecanum_drive_plugin
+  <!-- 5. VelocityControl + OdometryPublisher для платформы -->
+  <xacro:velocity_control_plugin
       prefix=""
       topic="$(arg cmd_vel_topic)"
       odom_topic="odom"

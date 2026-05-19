@@ -30,6 +30,13 @@
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
 
+# Информация о камере (нужна для RViz и других узлов)
+- ros_topic_name: "camera_info"
+  gz_topic_name: "camera_info" # Замените на топик, который указан в <camera_info_topic> вашего SDF/URDF
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
 # JointState входной группы (из тэга <publish_joint_state> в SDF)
 - ros_topic_name: "/entrance/joint_states"
   gz_topic_name: "/world/delivery_world/model/entrance_group_v3/joint_state"

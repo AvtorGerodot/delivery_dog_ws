@@ -113,6 +113,16 @@ def launch_setup(context, *args, **kwargs):
         output='screen',
     )
 
+    # Узел моста специально для изображений 
+    image_bridge = Node(
+        package='ros_gz_image', 
+        executable='image_bridge',
+        name='ros_gz_image_bridge',
+        # Сюда пишем имя топика с изображением из Gazebo
+        arguments=['front_camera/raw_img'], # Замените на <topic> из вашего URDF/SDF 
+        output='screen',
+    )
+
     delay_after_spawn = RegisterEventHandler(
         OnProcessExit(
             target_action=spawn_robot,
@@ -121,7 +131,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     actions = [gz, rsp_robot, spawn_robot, rsp_entrance, spawn_entrance,
-               delay_after_spawn, bridge]
+               delay_after_spawn, bridge, image_bridge]
 
     if use_rviz:
         rviz = Node(

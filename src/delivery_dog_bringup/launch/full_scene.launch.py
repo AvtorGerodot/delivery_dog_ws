@@ -24,14 +24,14 @@ def launch_setup(context, *args, **kwargs):
     pkg_mobile   = get_package_share_directory('mobile_base_model')
     pkg_entrance = get_package_share_directory('entrance_group_v3')
 
-    ex  = LaunchConfiguration('entrance_x').perform(context)
-    ey  = LaunchConfiguration('entrance_y').perform(context)
-    ez  = LaunchConfiguration('entrance_z').perform(context)
-    eyaw= LaunchConfiguration('entrance_yaw').perform(context)
-    rx  = LaunchConfiguration('robot_x').perform(context)
-    ry  = LaunchConfiguration('robot_y').perform(context)
-    rz  = LaunchConfiguration('robot_z').perform(context)
+    # ex  = LaunchConfiguration('entrance_x').perform(context)
+    # ey  = LaunchConfiguration('entrance_y').perform(context)
+    # ez  = LaunchConfiguration('entrance_z').perform(context)
+    # eyaw= LaunchConfiguration('entrance_yaw').perform(context)
     use_rviz = LaunchConfiguration('rviz').perform(context).lower() in ('1','true','yes')
+
+    cameras_on_bool = LaunchConfiguration('cameras_on').perform(context).lower() in ('1', 'true', 'yes')
+    cameras_on_str = 'true' if cameras_on_bool else 'false'
 
     import xacro
     composite_xacro = os.path.join(pkg_bringup,  'urdf', 'mobile_z1.urdf.xacro')
@@ -42,7 +42,9 @@ def launch_setup(context, *args, **kwargs):
         composite_xacro,
         mappings={'controllers_yaml': controllers_yaml,
                   'namespace': '/robot',
-                  'cmd_vel_topic': 'cmd_vel'},
+                  'cmd_vel_topic': 'cmd_vel',
+                  'cameras_on': cameras_on_str,
+                  },
     )
     composite_desc = composite_doc.toxml()
     entrance_desc  = xacro.process_file(entrance_xacro).toxml()
@@ -71,7 +73,8 @@ def launch_setup(context, *args, **kwargs):
         name='spawn_robot',
         arguments=['-name', 'mobile_z1',
                    '-topic', '/robot/robot_description',
-                   '-x', rx, '-y', ry, '-z', rz],
+                   '-z', '0.01',
+                   ],
         output='screen',
     )
 
@@ -87,7 +90,10 @@ def launch_setup(context, *args, **kwargs):
         name='spawn_entrance',
         arguments=['-name', 'entrance_group_v3',
                    '-topic', '/entrance/robot_description',
-                   '-x', ex, '-y', ey, '-z', ez, '-Y', eyaw],
+                #    '-x', ex, '-y', ey, '-z', ez, '-Y', eyaw,
+                    '-x', '2.5',
+                    '-Y', str(math.pi),
+                   ],
         output='screen',
     )
 
@@ -113,16 +119,6 @@ def launch_setup(context, *args, **kwargs):
         output='screen',
     )
 
-    # Узел моста специально для изображений 
-    image_bridge = Node(
-        package='ros_gz_image', 
-        executable='image_bridge',
-        name='ros_gz_image_bridge',
-        # Сюда пишем имя топика с изображением из Gazebo
-        arguments=['front_camera/raw_img'], # Замените на <topic> из вашего URDF/SDF 
-        output='screen',
-    )
-
     delay_after_spawn = RegisterEventHandler(
         OnProcessExit(
             target_action=spawn_robot,
@@ -131,7 +127,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     actions = [gz, rsp_robot, spawn_robot, rsp_entrance, spawn_entrance,
-               delay_after_spawn, bridge, image_bridge]
+               delay_after_spawn, bridge]
 
     if use_rviz:
         rviz = Node(
@@ -140,6 +136,18 @@ def launch_setup(context, *args, **kwargs):
             arguments=['-d', os.path.join(pkg_bringup, 'config', 'delivery.rviz')],
         )
         actions.append(rviz)
+    
+    if cameras_on_bool:
+        # Узел моста специально для изображений 
+        image_bridge = Node(
+            package='ros_gz_image', 
+            executable='image_bridge',
+            name='ros_gz_image_bridge',
+            # Сюда пишем имя топика с изображением из Gazebo
+            arguments=['sensor_my_camera/raw_img'], # Замените на <topic> из вашего URDF/SDF 
+            output='screen',
+        )
+        actions.append(image_bridge)
 
     return actions
 
@@ -163,14 +171,11 @@ def generate_launch_description():
 
     return LaunchDescription([
         set_resource_path,
-        DeclareLaunchArgument('robot_x',    default_value='0.0'),
-        DeclareLaunchArgument('robot_y',    default_value='0.0'),
-        # DeclareLaunchArgument('robot_z',    default_value='0.05'),
-        DeclareLaunchArgument('robot_z',    default_value='0.01'),
-        DeclareLaunchArgument('entrance_x', default_value='2.5'),
-        DeclareLaunchArgument('entrance_y', default_value='0.0'),
-        DeclareLaunchArgument('entrance_z', default_value='0.0'),
-        DeclareLaunchArgument('entrance_yaw', default_value=str(math.pi)),
+        # DeclareLaunchArgument('entrance_x', default_value='2.5'),
+        # DeclareLaunchArgument('entrance_y', default_value='0.0'),
+        # DeclareLaunchArgument('entrance_z', default_value='0.0'),
+        # DeclareLaunchArgument('entrance_yaw', default_value=str(math.pi)),
         DeclareLaunchArgument('rviz', default_value='false'),
+        DeclareLaunchArgument('cameras_on', default_value='false'),
         OpaqueFunction(function=launch_setup),
     ])

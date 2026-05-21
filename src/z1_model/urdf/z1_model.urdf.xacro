@@ -275,6 +275,44 @@
             </inertial>
         </link>
 
+        <!-- Нажимной элемент (Finger) -->
+      <link name="z1_Gripper_finger">
+        <inertial>
+            <origin xyz="0.117494 0.0 -0.040887" rpy="0 0 0"/>
+            <mass value="0.003286"/>
+            <inertia 
+                ixx="0.0000000259" ixy="0.0" ixz="-0.0000000568" 
+                iyy="0.000001303" iyz="0.0" 
+                izz="0.000001293"/>
+        </inertial>
+        <visual>
+            <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+            <origin xyz="0.139 0 -0.042" rpy="0 1.5708 0"/>
+            <geometry>
+                <!-- <mesh filename="$(find z1_model)/meshes/visual/stl_models/z1_Gripper_finger.stl" scale="1 1 1"/> -->
+                <cylinder length="0.036" radius="0.003"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+            <origin xyz="0.139 0 -0.042" rpy="0 1.5708 0"/>
+            <geometry>
+                <!-- Рекомендуется использовать упрощенную геометрию для коллизий, но можно и stl -->
+                <!-- <mesh filename="$(find z1_model)/meshes/visual/z1_Gripper_finger.stl" scale="1 1 1"/> -->
+                <cylinder length="0.036" radius="0.003"/>
+
+            </geometry>
+        </collision>
+      </link>
+
+      <!-- Крепление нажимного элемента к статору схвата -->
+      <joint name="gripper_stator_to_finger" type="fixed">
+          <parent link="gripperStator"/> <!-- Замените на точное имя link'а вашего статора -->
+          <child link="z1_Gripper_finger"/>
+          <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Позиции совпадают, как вы указали -->
+      </joint>
+
         <joint name="jointGripper" type="revolute">
             <origin rpy="0 0 0" xyz="0.049 0.0 0"/>
             <parent link="gripperStator"/>

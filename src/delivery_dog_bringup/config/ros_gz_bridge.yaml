@@ -31,8 +31,8 @@
   direction: GZ_TO_ROS
 
 # Информация о камере (нужна для RViz и других узлов)
-- ros_topic_name: "camera_info"
-  gz_topic_name: "camera_info" # Замените на топик, который указан в <camera_info_topic> вашего SDF/URDF
+- ros_topic_name: "my_camera_info"
+  gz_topic_name: "my_camera_info" # Замените на топик, который указан в <camera_info_topic> вашего SDF/URDF
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS

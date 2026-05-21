@@ -20,13 +20,14 @@
 
   <xacro:property name="default_mount_height"  value="0.14"/>
 
-  <xacro:arg name="controllers_yaml" default="/tmp/mobile_z1_controllers.yaml"/>
-  <xacro:arg name="namespace"        default="/robot"/>
-  <xacro:arg name="cmd_vel_topic"    default="cmd_vel"/>
+  <xacro:arg name="controllers_yaml"  default="/tmp/mobile_z1_controllers.yaml"/>
+  <xacro:arg name="namespace"         default="/robot"/>
+  <xacro:arg name="cmd_vel_topic"     default="cmd_vel"/>
+  <xacro:arg name="cameras_on"        default="false"/>
 
   <!-- 1. Платформа -->
   <xacro:include filename="$(find mobile_base_model)/urdf/mobile_base_macro.urdf.xacro"/>
-  <xacro:mobile_base prefix="" mount_height="${default_mount_height}"/>
+  <xacro:mobile_base prefix="" mount_height="${default_mount_height}" cameras_on="$(arg cameras_on)"/>
 
   <!-- 2. Z1 на крышке -->
   <xacro:include filename="$(find z1_model)/urdf/z1_arm_macro.urdf.xacro"/>

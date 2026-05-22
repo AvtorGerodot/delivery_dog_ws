@@ -225,10 +225,10 @@
       <material name="intercom_dark"><color rgba="0.13 0.13 0.16 1.0"/></material>
     </visual>
     <collision>
-      <geometry><box size="0.05 0.15 0.25"/></geometry>
+      <geometry><box size="0.015 0.12 0.20"/></geometry>
     </collision>
     <inertial>
-      <mass value="1.5"/>
+      <mass value="1.0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.008" iyz="0" izz="0.005"/>
     </inertial>
   </link>
@@ -238,7 +238,7 @@
     <child link="intercom_body"/>
     <!-- Домофон висит на НАРУЖНОЙ стороне стены (X = -wall_thickness/2 - depth/2 = -0.125),
          справа от двери в системе модели (Y = -0.75), высота 1.5 м. -->
-    <origin xyz="0.125 -0.75 1.5" rpy="0 0 0"/>
+    <origin xyz="0.1025 -0.75 1.4" rpy="0 0 0"/>
   </joint>
 
   <!-- <gazebo reference="intercom_body">

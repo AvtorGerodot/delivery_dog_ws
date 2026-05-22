@@ -321,6 +321,21 @@
           <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Позиции совпадают, как вы указали -->
       </joint>
 
+      <!-- TCP на кончике нажимного элемента -->
+      <!-- Пустой линк без массы и визуализации -->
+      <link name="finger_tcp_link"/>
+      <!-- </link> -->
+
+      <joint name="finger_to_finger_tcp" type="fixed">
+        <parent link="z1_Gripper_finger"/>
+        <child link="finger_tcp_link"/>
+        <!-- Сдвигаем точку ровно туда, где находится край визуального цилиндра -->
+        <!-- Цилиндр имеет длину 0.036 и сдвинут на 0.139. 
+            Eго край находится на: 0.139 + (0.036/2) = 0.157 -->
+        <origin xyz="0.157 0 -0.042" rpy="0 1.5708 0"/>
+      </joint>
+
+      <!-- подвижная часть схвата -->
       <joint name="${prefix}jointGripper" type="revolute">
         <origin rpy="0 0 0" xyz="0.049 0.0 0"/>
         <parent link="${prefix}gripperStator"/>

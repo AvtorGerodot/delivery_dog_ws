@@ -68,11 +68,14 @@ def launch_setup(context, *args, **kwargs):
         output='screen',
     )
 
+    robot_entrance_gap = 0.3
     spawn_robot = Node(
         package='ros_gz_sim', executable='create',
         name='spawn_robot',
         arguments=['-name', 'mobile_z1',
                    '-topic', '/robot/robot_description',
+                   '-x', str(2.5 - 0.5 - robot_entrance_gap), #- 0.1 - 0.13925 - 0.387
+                   '-y', str(0.75),
                    '-z', '0.01',
                    ],
         output='screen',

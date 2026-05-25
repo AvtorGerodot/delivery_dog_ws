@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot name="b2_one_leg" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Аргумент для пути к мешам (абсолютный) -->
+  <xacro:arg name="mesh_path" default="/home/ager/delivery_dog_ws/install/b2_description/share/b2_description/meshes"/>
+
+  <!-- Подключаем константы, материалы и модифицированный макрос ноги -->
+  <xacro:include filename="const.xacro"/>
+  <xacro:include filename="materials.xacro"/>
+  <xacro:include filename="leg.xacro"/>
+
+  <!-- base link (невидимая опора) -->
+  <link name="base">
+    <inertial><mass value="1.0"/><inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/></inertial>
+    <visual><geometry><box size="0.001 0.001 0.001"/></geometry></visual>
+    <collision><geometry><box size="0.001 0.001 0.001"/></geometry></collision>
+  </link>
+
+  <!-- trunk с мешем (визуал из меша, коллизия – box) -->
+  <link name="trunk">
+    <inertial>
+      <mass value="35.606"/>
+      <inertia ixx="0.27466" ixy="-0.000622" ixz="-0.00315" iyy="1.0618" iyz="-0.00139" izz="1.1825"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="$(find b2_description)/meshes/trunk.dae" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry><box size="0.5 0.28 0.15"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="floating_base" type="fixed">
+    <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    <parent link="base"/><child link="trunk"/>
+  </joint>
+
+  <!-- Вызов макроса для одной ноги (FL) -->
+  <!-- <xacro:leg name="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True"/> -->
+
+  
+  <xacro:leg name="FL" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True"/>
+  <xacro:leg name="FR" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True"/>
+  <xacro:leg name="RL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False"/>
+  <xacro:leg name="RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False"/>
+  
+
+  <xacro:macro name="leg_ros2_control" params="leg_name">
+    <joint name="${leg_name}_hip_joint">
+      <command_interface name="effort"><param name="min">-200</param><param name="max">200</param></command_interface>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+      <param name="initial_position">0.0</param>
+    </joint>
+    <joint name="${leg_name}_thigh_joint">
+      <command_interface name="effort"><param name="min">-200</param><param name="max">200</param></command_interface>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+      <param name="initial_position">0.0</param>
+    </joint>
+    <joint name="${leg_name}_calf_joint">
+      <command_interface name="effort"><param name="min">-320</param><param name="max">320</param></command_interface>
+      <state_interface name="position"/><state_interface name="velocity"/><state_interface name="effort"/>
+      <param name="initial_position">-0.5</param>
+    </joint>
+  </xacro:macro>
+
+  <!-- ROS2 CONTROL (только для суставов FL) -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <xacro:leg_ros2_control leg_name="FL"/>
+    <xacro:leg_ros2_control leg_name="FR"/>
+    <xacro:leg_ros2_control leg_name="RL"/>
+    <xacro:leg_ros2_control leg_name="RR"/>
+  </ros2_control>
+
+  <!-- Подключаем Gazebo-плагины (из gazebo.xacro) -->
+  <xacro:include filename="gazebo.xacro"/>
+
+</robot>

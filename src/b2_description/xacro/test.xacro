@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot name="test_model" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <link name="world"/>
+    
+    <xacro:include filename="stairs.xacro"/>
+
+    <!-- Вызов макроса -->
+    <xacro:stairs stairs="5" xpos="0" ypos="0" zpos="0"/>
+    
+</robot>

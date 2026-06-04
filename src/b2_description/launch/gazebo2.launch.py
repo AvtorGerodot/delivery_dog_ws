@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -7,8 +7,12 @@ import os
 
 from launch.substitutions import Command, FindExecutable
 from launch_ros.parameter_descriptions import ParameterValue
- 
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 from launch_ros.substitutions import FindPackageShare
+from launch.conditions import IfCondition
+from launch.substitutions import PythonExpression
+
+
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('b2_description')
@@ -18,7 +22,6 @@ def generate_launch_description():
     robot_description_subst = Command(['xacro ', xacro_file])
 
     # xacro_file = os.path.join(pkg_share, 'urdf', 'b2_one_leg.urdf')
-    # # robot_description_subst = Command(['xacro ', xacro_file])
     # robot_description_subst = Command(['cat ', xacro_file])
 
     # xacro_file = os.path.join(pkg_share, 'xacro', 'b2_one_leg.xacro')
@@ -28,15 +31,31 @@ def generate_launch_description():
     robot_description = ParameterValue(robot_description_subst, value_type=str)
     robot_description_param = {'robot_description': robot_description}
     
+
+
+    # 1. Declare the new launch argument
+    control_mode_arg = DeclareLaunchArgument(
+        'control_mode',
+        default_value='effort',
+        description='Control mode: effort or position'
+    )
+    control_mode = LaunchConfiguration('control_mode')
+
+
+    use_effort = PythonExpression(["'", control_mode, "' == 'effort'"])
+    use_position = PythonExpression(["'", control_mode, "' == 'position'"])
+
     # 2. Запуск Gazebo Harmonic с пустым миром (или вашим миром)
     # Используем стандартный launch-файл ros_gz_sim
     gz_launch_file = os.path.join(
         get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py'
     )
     # Можно использовать empty.sdf или создать свой мир
-    world_file = os.path.join(pkg_share, 'worlds', 'empty.sdf')  # создайте папку worlds, если нужно
-    if not os.path.exists(world_file):
-        world_file = 'empty.sdf'  # тогда Gazebo возьмёт встроенный
+    # world_file = os.path.join(pkg_share, 'worlds', 'empty.sdf')  # создайте папку worlds, если нужно
+    # if not os.path.exists(world_file):
+    #     world_file = 'empty.sdf'  # тогда Gazebo возьмёт встроенный
+
+    world_file = 'empty.sdf'
     
     start_gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gz_launch_file),
@@ -60,7 +79,10 @@ def generate_launch_description():
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-name', 'b2', '-topic', 'robot_description'],
+        arguments=['-name', 'b2', 
+                   '-topic', 'robot_description',
+                   '-z', '0.8',
+                   ],
         output='screen'
     )
     
@@ -92,15 +114,39 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 8. Спавн единого effort_controller
+    # 8. Спавн effort_controller
     effort_spawner = Node(
         package='controller_manager',
         executable='spawner',
         arguments=['effort_controller'],
+        condition=IfCondition(use_effort),  # Need to imp # , default='effort' # LaunchConfiguration('control_mode')
+        output='screen'
+    )
+
+    # Define the standing pose (positions for all 12 joints)
+    standing_pose = [0.0, 0.0, -0.5,  # FL joints
+                    0.0, 0.0, -0.5,  # FR joints
+                    0.0, 0.0, -0.5,  # RL joints
+                    0.0, 0.0, -0.5]  # RR joints
+    
+    position_controller_joints = [
+        'FL_hip_joint', 'FL_thigh_joint', 'FL_calf_joint',
+        'FR_hip_joint', 'FR_thigh_joint', 'FR_calf_joint',
+        'RL_hip_joint', 'RL_thigh_joint', 'RL_calf_joint',
+        'RR_hip_joint', 'RR_thigh_joint', 'RR_calf_joint',
+    ]
+
+    position_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['position_controller'],
+        condition=IfCondition(use_position),
+        # parameters=[{'joints': position_controller_joints, 'initial_position': standing_pose}], # Pass the pose as a parameter
         output='screen'
     )
 
     return LaunchDescription([
+        control_mode_arg,
         start_gz_sim,
         gz_bridge,
         spawn_robot,
@@ -108,4 +154,7 @@ def generate_launch_description():
         static_tf,
         jsb_spawner,
         effort_spawner,
+        position_spawner,
     ])
+
+# ros2 topic pub /position_controller/commands std_msgs/Float64MultiArray "{data: [0.0, 0.4, -0.7, 0.0, 0.4, -0.7, 0.0, 0.4, -0.7, 0.0, 0.4, -0.7]}"

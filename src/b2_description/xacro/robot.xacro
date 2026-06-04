@@ -174,138 +174,47 @@
 
     <!-- <xacro:stairs stairs="15" xpos="0" ypos="2.0" zpos="0" /> -->
 
+    <xacro:macro name="joint_control_block" params="name effort_min effort_max pos_min pos_max init_pos">
+    <joint name="${name}">
+        <command_interface name="effort">
+        <param name="min">${effort_min}</param>
+        <param name="max">${effort_max}</param>
+        </command_interface>
+        <command_interface name="position">
+        <param name="min">${pos_min}</param>
+        <param name="max">${pos_max}</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+        <param name="initial_position">${init_pos}</param>
+    </joint>
+    </xacro:macro>
+
     <ros2_control name="GazeboSystem" type="system">
         <hardware>
             <plugin>gz_ros2_control/GazeboSimSystem</plugin>
         </hardware>
 
         <!-- FL leg -->
-        <joint name="FL_hip_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="FL_thigh_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="FL_calf_joint">
-            <command_interface name="effort">
-            <param name="min">-320</param>
-            <param name="max">320</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">-0.5</param>
-        </joint>
+        <xacro:joint_control_block name="FL_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+        <xacro:joint_control_block name="FL_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+        <xacro:joint_control_block name="FL_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
 
         <!-- FR leg -->
-        <joint name="FR_hip_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="FR_thigh_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="FR_calf_joint">
-            <command_interface name="effort">
-            <param name="min">-320</param>
-            <param name="max">320</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">-0.5</param>
-        </joint>
+        <xacro:joint_control_block name="FR_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+        <xacro:joint_control_block name="FR_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+        <xacro:joint_control_block name="FR_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
 
         <!-- RL leg -->
-        <joint name="RL_hip_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="RL_thigh_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="RL_calf_joint">
-            <command_interface name="effort">
-            <param name="min">-320</param>
-            <param name="max">320</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">-0.5</param>
-        </joint>
+        <xacro:joint_control_block name="RL_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+        <xacro:joint_control_block name="RL_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+        <xacro:joint_control_block name="RL_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
 
         <!-- RR leg -->
-        <joint name="RR_hip_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="RR_thigh_joint">
-            <command_interface name="effort">
-            <param name="min">-200</param>
-            <param name="max">200</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">0.0</param>
-        </joint>
-        <joint name="RR_calf_joint">
-            <command_interface name="effort">
-            <param name="min">-320</param>
-            <param name="max">320</param>
-            </command_interface>
-            <state_interface name="position"/>
-            <state_interface name="velocity"/>
-            <state_interface name="effort"/>
-            <param name="initial_position">-0.5</param>
-        </joint>
+        <xacro:joint_control_block name="RR_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+        <xacro:joint_control_block name="RR_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+        <xacro:joint_control_block name="RR_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
     </ros2_control>
 
     <xacro:include filename="gazebo.xacro"/>

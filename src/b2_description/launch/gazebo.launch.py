@@ -1,63 +1,160 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, Command, FindExecutable, PathJoinSubstitution
-from launch_ros.substitutions import FindPackageShare
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+import os
+
+from launch.substitutions import Command, FindExecutable
+from launch_ros.parameter_descriptions import ParameterValue
+from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch_ros.substitutions import FindPackageShare
+from launch.conditions import IfCondition
+from launch.substitutions import PythonExpression
+
+
 
 def generate_launch_description():
-    pkg_name = 'b2_description'
-    # urdf = PathJoinSubstitution([
-    #     FindPackageShare(pkg_name), 'urdf', 'b2_description.urdf'
-    # ])
-    # Используем готовый URDF или генерируем через xacro
-    # robot_description = Command([FindExecutable(name='xacro'), ' ', urdf])
+    pkg_share = get_package_share_directory('b2_description')
     
-    urdf_xacro = PathJoinSubstitution([
-        FindPackageShare(pkg_name), 'xacro', 'robot.xacro'
-    ])
-    robot_description = Command([FindExecutable(name='xacro'), ' ', urdf_xacro])
+    # 1. Генерация robot_description из xacro
+    xacro_file = os.path.join(pkg_share, 'xacro', 'b2_robot_standalone.urdf.xacro')
+    robot_description_subst = Command(['xacro ', xacro_file])
+
+    # xacro_file = os.path.join(pkg_share, 'urdf', 'b2_one_leg.urdf')
+    # robot_description_subst = Command(['cat ', xacro_file])
+
+    # xacro_file = os.path.join(pkg_share, 'xacro', 'b2_one_leg.xacro')
+    # robot_description_subst = Command(['xacro ', xacro_file])
     
+    
+    robot_description = ParameterValue(robot_description_subst, value_type=str)
+    robot_description_param = {'robot_description': robot_description}
+    
+
+
+    # 1. Declare the new launch argument
+    control_mode_arg = DeclareLaunchArgument(
+        'control_mode',
+        default_value='effort',
+        description='Control mode: effort or position'
+    )
+    control_mode = LaunchConfiguration('control_mode')
+
+
+    use_effort = PythonExpression(["'", control_mode, "' == 'effort'"])
+    use_position = PythonExpression(["'", control_mode, "' == 'position'"])
+
+    # 2. Запуск Gazebo Harmonic с пустым миром (или вашим миром)
+    # Используем стандартный launch-файл ros_gz_sim
+    gz_launch_file = os.path.join(
+        get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py'
+    )
+    # Можно использовать empty.sdf или создать свой мир
+    # world_file = os.path.join(pkg_share, 'worlds', 'empty.sdf')  # создайте папку worlds, если нужно
+    # if not os.path.exists(world_file):
+    #     world_file = 'empty.sdf'  # тогда Gazebo возьмёт встроенный
+
+    world_file = 'empty.sdf'
+    
+    start_gz_sim = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(gz_launch_file),
+        launch_arguments={
+            'gz_args': f'-r {world_file}',
+            'on_exit_shutdown': 'True',
+        }.items()
+    )
+    
+    # 3. Мост Gazebo -> ROS2 (синхронизация времени и другие топики)
+    bridge_config = os.path.join(pkg_share, 'config', 'gz_bridge.yaml')
+    gz_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='gz_bridge',
+        parameters=[{'config_file': bridge_config}],
+        output='screen'
+    )
+    
+    # 4. Спавн модели робота
+    spawn_robot = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-name', 'b2', 
+                   '-topic', 'robot_description',
+                   '-z', '0.8',
+                   ],
+        output='screen'
+    )
+    
+    # 5. robot_state_publisher
+    rsp = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        parameters=[robot_description_param, {'use_sim_time': True}],
+        output='screen'
+    )
+    
+    # 6. Статическая трансформация base -> base_footprint
+    static_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=[
+            '--x', '0', '--y', '0', '--z', '0',
+            '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
+            '--frame-id', 'base', '--child-frame-id', 'base_footprint'
+        ],
+        output='screen'
+    )
+    
+     # 7. Спавн joint_state_broadcaster
+    jsb_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster'],
+        output='screen'
+    )
+
+    # 8. Спавн effort_controller
+    effort_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['effort_controller'],
+        condition=IfCondition(use_effort),  # Need to imp # , default='effort' # LaunchConfiguration('control_mode')
+        output='screen'
+    )
+
+    # Define the standing pose (positions for all 12 joints)
+    standing_pose = [0.0, 0.0, -0.5,  # FL joints
+                    0.0, 0.0, -0.5,  # FR joints
+                    0.0, 0.0, -0.5,  # RL joints
+                    0.0, 0.0, -0.5]  # RR joints
+    
+    position_controller_joints = [
+        'FL_hip_joint', 'FL_thigh_joint', 'FL_calf_joint',
+        'FR_hip_joint', 'FR_thigh_joint', 'FR_calf_joint',
+        'RL_hip_joint', 'RL_thigh_joint', 'RL_calf_joint',
+        'RR_hip_joint', 'RR_thigh_joint', 'RR_calf_joint',
+    ]
+
+    position_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['position_controller'],
+        condition=IfCondition(use_position),
+        # parameters=[{'joints': position_controller_joints, 'initial_position': standing_pose}], # Pass the pose as a parameter
+        output='screen'
+    )
 
     return LaunchDescription([
-        # 1. Запуск Gazebo
-        ExecuteProcess(
-            cmd=['gz', 'sim', '-r', 'empty.sdf'],
-            output='screen'
-        ),
-        
-        # 2. Мост для синхронизации времени (как в Z1)
-        Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-            output='screen'
-        ),
-        
-        # 3. Спавн робота
-        Node(
-            package='ros_gz_sim',
-            executable='create',
-            arguments=['-name', 'b2', '-topic', 'robot_description'],
-            output='screen'
-        ),
-        
-        # 4. Статическая трансформация
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments=[
-                '--x', '0', '--y', '0', '--z', '0',
-                '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
-                '--frame-id', 'base', '--child-frame-id', 'base_footprint'
-            ],
-            output='screen'
-        ),
-        
-        # 5. robot_state_publisher (с симуляционным временем)
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            parameters=[{'robot_description': robot_description, 'use_sim_time': True}]
-        )
+        control_mode_arg,
+        start_gz_sim,
+        gz_bridge,
+        spawn_robot,
+        rsp,
+        static_tf,
+        jsb_spawner,
+        effort_spawner,
+        position_spawner,
     ])
 
+# ros2 topic pub /position_controller/commands std_msgs/Float64MultiArray "{data: [0.0, 0.4, -0.7, 0.0, 0.4, -0.7, 0.0, 0.4, -0.7, 0.0, 0.4, -0.7]}"

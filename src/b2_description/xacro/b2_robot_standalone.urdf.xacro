@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="b2_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="b2_robot_macro.urdf.xacro"/>
+
+  <!-- Используем макрос с префиксом "" и parent="world" -->
+  <xacro:b2_robot prefix="" xyz="0 0 0" rpy="0 0 0"/>
+
+  <!-- ros2_control блок -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <xacro:b2_ros2_control prefix=""/>
+  </ros2_control>
+
+  <xacro:include filename="gazebo.xacro"/>
+
+</robot>

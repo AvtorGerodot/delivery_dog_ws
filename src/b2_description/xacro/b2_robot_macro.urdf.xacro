@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Подключаем константы, материалы и макрос ноги -->
+  <xacro:include filename="const.xacro"/>
+  <xacro:include filename="materials.xacro"/>
+  <xacro:include filename="leg.xacro"/>
+
+  <!-- ======================================================================
+       Вспомогательный макрос для объявления одного сустава в ros2_control.
+       Используется в b2_ros2_control.
+  ====================================================================== -->
+  <xacro:macro name="joint_control_block" params="name effort_min effort_max pos_min pos_max init_pos">
+    <joint name="${name}">
+      <command_interface name="effort">
+        <param name="min">${effort_min}</param>
+        <param name="max">${effort_max}</param>
+      </command_interface>
+      <command_interface name="position">
+        <param name="min">${pos_min}</param>
+        <param name="max">${pos_max}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+      <param name="initial_position">${init_pos}</param>
+    </joint>
+  </xacro:macro>
+
+  <!-- ======================================================================
+       МАКРОС ВСЕГО РОБОТА B2 (только геометрия и кинематика, БЕЗ ros2_control)
+       Параметры:
+         prefix   – префикс для всех линков/джойнтов (например "b2_")
+         parent   – родительский линк, к которому крепится base
+         xyz, rpy – смещение и поворот относительно родителя
+  ====================================================================== -->
+  <xacro:macro name="b2_robot" params="prefix:='' xyz:='0 0 0' rpy:='0 0 0'">  
+
+    <!-- base – невидимый линк для привязки фрейма -->
+    <link name="${prefix}base">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry><box size="0.001 0.001 0.001"/></geometry>
+      </visual>
+    </link>
+
+    <!-- floating_base – жёсткая связь между base и trunk -->
+    <joint name="${prefix}floating_base" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <parent link="${prefix}base"/>
+      <child link="${prefix}trunk"/>
+    </joint>
+
+    <!-- TRUNK (корпус) -->
+    <link name="${prefix}trunk">
+      <inertial>
+        <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+        <mass value="${trunk_mass}"/>
+        <inertia ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                 iyy="${trunk_iyy}" iyz="${trunk_iyz}" izz="${trunk_izz}"/>
+      </inertial>
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="$(find b2_description)/meshes/trunk.dae" scale="1 1 1"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- IMU -->
+    <joint name="${prefix}imu_joint" type="fixed">
+      <parent link="${prefix}trunk"/>
+      <child link="${prefix}imu_link"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+    <link name="${prefix}imu_link">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <geometry><box size="0.001 0.001 0.001"/></geometry>
+      </visual>
+      <collision>
+        <geometry><box size="0.001 0.001 0.001"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Голова -->
+    <joint name="${prefix}head_joint" type="fixed">
+      <parent link="${prefix}trunk"/>
+      <child link="${prefix}head_Link"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+    <link name="${prefix}head_Link">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.33989 -0.000168 0.12029"/>
+        <mass value="3.366"/>
+        <inertia ixx="0.026455" ixy="3.15E-05" ixz="0.00166"
+                 iyy="0.029221" iyz="-3.27E-05" izz="0.010918"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0.41 0 0.005"/>
+        <geometry><box size="0.04 0.12 0.14"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Лидар -->
+    <joint name="${prefix}lidar_joint" type="fixed">
+      <parent link="${prefix}trunk"/>
+      <child link="${prefix}lidar_link"/>
+      <origin rpy="0 0 0" xyz="0.34218 0 0.17851"/>
+    </joint>
+    <link name="${prefix}lidar_link">
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="6.55E-08"/>
+        <inertia ixx="1.64E-15" ixy="0" ixz="-1.09E-47"
+                 iyy="1.64E-15" iyz="-1.32E-47" izz="1.64E-15"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 -0.02"/>
+        <geometry><cylinder length="0.16" radius="0.076"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Хвост -->
+    <joint name="${prefix}tail_joint" type="fixed">
+      <parent link="${prefix}trunk"/>
+      <child link="${prefix}tail_link"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+    <link name="${prefix}tail_link">
+      <inertial>
+        <origin rpy="0 0 0" xyz="-0.37448 0.000488 0.006495"/>
+        <mass value="0.777"/>
+        <inertia ixx="0.0028118" ixy="1.95E-05" ixz="-7.87E-06"
+                 iyy="0.0047506" iyz="-1.57E-05" izz="0.0029154"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="-0.405 0 0.005"/>
+        <geometry><box size="0.025 0.12 0.14"/></geometry>
+      </collision>
+    </link>
+
+    <!-- Четыре ноги. Передаём префикс, имена ног включают префикс -->
+    <xacro:leg name="${prefix}FL" mirror="1"  mirror_dae="True"  front_hind="1"  front_hind_dae="True"  prefix="${prefix}"/>
+    <xacro:leg name="${prefix}FR" mirror="-1" mirror_dae="False" front_hind="1"  front_hind_dae="True"  prefix="${prefix}"/>
+    <xacro:leg name="${prefix}RR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False" prefix="${prefix}"/>
+    <xacro:leg name="${prefix}RL" mirror="1"  mirror_dae="True"  front_hind="-1" front_hind_dae="False" prefix="${prefix}"/>
+
+  </xacro:macro>
+
+  <!-- ======================================================================
+       МАКРОС ДЛЯ ros2_control БЛОКА B2 (12 суставов)
+       Использует вспомогательный макрос joint_control_block, определённый выше.
+       Параметр: prefix – префикс имён суставов (должен совпадать с тем, что
+                 использовалось в b2_robot).
+  ====================================================================== -->
+  <xacro:macro name="b2_ros2_control" params="prefix:=''">
+    <!-- FL leg -->
+    <xacro:joint_control_block name="${prefix}FL_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}FL_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}FL_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
+
+    <!-- FR leg -->
+    <xacro:joint_control_block name="${prefix}FR_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}FR_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}FR_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
+
+    <!-- RL leg -->
+    <xacro:joint_control_block name="${prefix}RL_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}RL_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}RL_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
+
+    <!-- RR leg -->
+    <xacro:joint_control_block name="${prefix}RR_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}RR_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>
+    <xacro:joint_control_block name="${prefix}RR_calf_joint" effort_min="-320" effort_max="320" pos_min="-2.82" pos_max="-0.43" init_pos="-0.5"/>
+  </xacro:macro>
+
+</robot>

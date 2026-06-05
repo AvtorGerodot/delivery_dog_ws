@@ -12,7 +12,7 @@
     <!-- Аргументы: положение и крепление Z1 на собаке -->
     <!-- <xacro:arg name="b2_xyz" default="0 0 0"/>
     <xacro:arg name="b2_rpy" default="0 0 0"/> -->
-    <xacro:arg name="mount_position" default="0.387 0 0.25"/> <!-- высота крепления Z1 над спиной -->
+    <xacro:arg name="mount_position" default="0.35 0 0.275"/> <!-- высота крепления Z1 над спиной -->
 
 
     <!-- Вставляем собаку B2 (без ros2_control) -->

@@ -292,7 +292,7 @@
                 <!-- <mesh filename="$(find z1_model)/meshes/visual/stl_models/z1_Gripper_finger.stl" scale="1 1 1"/> -->
                 <cylinder length="0.036" radius="0.003"/>
             </geometry>
-            <material name="grey"/>
+            <material name="red"/>
         </visual>
         <collision>
             <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->

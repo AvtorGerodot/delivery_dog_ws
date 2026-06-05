@@ -2,9 +2,9 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <material name="grey">
+    <!-- <material name="grey">
         <color rgba="0.5 0.5 0.5 1.0"/>
-    </material>
+    </material> -->
     <material name="iron_red">
         <color rgba="0.80 0.06 0.06 1.0"/>
     </material>

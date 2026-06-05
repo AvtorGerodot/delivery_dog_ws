@@ -11,7 +11,7 @@
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
-    <xacro:b2_ros2_control prefix=""/>
+    <xacro:b2_ros2_control_list prefix=""/>
   </ros2_control>
 
   <xacro:include filename="gazebo.xacro"/>

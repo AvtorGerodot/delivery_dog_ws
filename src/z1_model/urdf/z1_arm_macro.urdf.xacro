@@ -284,7 +284,7 @@
       </link>
 
       <!-- Нажимной элемент (Finger) -->
-      <link name="z1_Gripper_finger">
+      <link name="${prefix}Gripper_finger">
         <inertial>
             <origin xyz="0.117494 0.0 -0.040887" rpy="0 0 0"/>
             <mass value="0.003286"/>
@@ -300,7 +300,7 @@
                 <!-- <mesh filename="$(find z1_model)/meshes/visual/stl_models/z1_Gripper_finger.stl" scale="1 1 1"/> -->
                 <cylinder length="0.036" radius="0.003"/>
             </geometry>
-            <material name="grey"/>
+            <material name="red"/>
         </visual>
         <collision>
             <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
@@ -316,19 +316,19 @@
 
       <!-- Крепление нажимного элемента к статору схвата -->
       <joint name="gripper_stator_to_finger" type="fixed">
-          <parent link="gripperStator"/> <!-- Замените на точное имя link'а вашего статора -->
-          <child link="z1_Gripper_finger"/>
+          <parent link="${prefix}gripperStator"/> <!-- Замените на точное имя link'а вашего статора -->
+          <child link="${prefix}Gripper_finger"/>
           <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Позиции совпадают, как вы указали -->
       </joint>
 
       <!-- TCP на кончике нажимного элемента -->
       <!-- Пустой линк без массы и визуализации -->
-      <link name="finger_tcp_link"/>
+      <link name="${prefix}finger_tcp_link"/>
       <!-- </link> -->
 
       <joint name="finger_to_finger_tcp" type="fixed">
-        <parent link="z1_Gripper_finger"/>
-        <child link="finger_tcp_link"/>
+        <parent link="${prefix}Gripper_finger"/>
+        <child link="${prefix}finger_tcp_link"/>
         <!-- Сдвигаем точку ровно туда, где находится край визуального цилиндра -->
         <!-- Цилиндр имеет длину 0.036 и сдвинут на 0.139. 
             Eго край находится на: 0.139 + (0.036/2) = 0.157 -->
@@ -401,6 +401,21 @@
         <xacro:joint_controller name="${prefix}jointGripper" initial_position="0.0"/>
       </xacro:if>
     </ros2_control>
+  </xacro:macro>
+
+  <xacro:macro name="z1_ros2_control_list" params="prefix:='' use_gripper:=true name:=Z1GazeboSystem">
+
+    <xacro:joint_controller name="${prefix}joint1" initial_position="0.0"/>
+    <xacro:joint_controller name="${prefix}joint2" initial_position="0.0"/>
+    <xacro:joint_controller name="${prefix}joint3" initial_position="-0.035"/>
+    <xacro:joint_controller name="${prefix}joint4" initial_position="-1.047"/>
+    <xacro:joint_controller name="${prefix}joint5" initial_position="0.0"/>
+    <xacro:joint_controller name="${prefix}joint6" initial_position="0.0"/>
+
+    <xacro:if value="${use_gripper}">
+      <xacro:joint_controller name="${prefix}jointGripper" initial_position="0.0"/>
+    </xacro:if>
+
   </xacro:macro>
 
   <!-- Локальный макрос-обёртка для регистрации одного джойнта в ros2_control.

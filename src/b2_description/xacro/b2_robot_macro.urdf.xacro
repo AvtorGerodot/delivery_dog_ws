@@ -164,7 +164,7 @@
        Параметр: prefix – префикс имён суставов (должен совпадать с тем, что
                  использовалось в b2_robot).
   ====================================================================== -->
-  <xacro:macro name="b2_ros2_control" params="prefix:=''">
+  <xacro:macro name="b2_ros2_control_list" params="prefix:=''">
     <!-- FL leg -->
     <xacro:joint_control_block name="${prefix}FL_hip_joint"  effort_min="-200" effort_max="200" pos_min="-0.87" pos_max="0.87" init_pos="0.0"/>
     <xacro:joint_control_block name="${prefix}FL_thigh_joint" effort_min="-200" effort_max="200" pos_min="-0.94" pos_max="4.69" init_pos="0.0"/>

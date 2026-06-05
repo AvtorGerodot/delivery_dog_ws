@@ -1,0 +1,57 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 1000
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    effort_controller:
+      type: forward_command_controller/ForwardCommandController
+    position_controller:
+      type: position_controllers/JointGroupPositionController
+
+effort_controller:
+  ros__parameters:
+    joints:
+      # B2 (12 суставов)
+      - b2_FL_hip_joint
+      - b2_FL_thigh_joint
+      - b2_FL_calf_joint
+      - b2_FR_hip_joint
+      - b2_FR_thigh_joint
+      - b2_FR_calf_joint
+      - b2_RL_hip_joint
+      - b2_RL_thigh_joint
+      - b2_RL_calf_joint
+      - b2_RR_hip_joint
+      - b2_RR_thigh_joint
+      - b2_RR_calf_joint
+      # Z1 (7 суставов)
+      - z1_joint1
+      - z1_joint2
+      - z1_joint3
+      - z1_joint4
+      - z1_joint5
+      - z1_joint6
+      - z1_jointGripper
+    interface_name: effort
+
+position_controller:
+  ros__parameters:
+    joints:
+      # Только суставы B2 (собака управляется по положению)
+      - b2_FL_hip_joint
+      - b2_FL_thigh_joint
+      - b2_FL_calf_joint
+      - b2_FR_hip_joint
+      - b2_FR_thigh_joint
+      - b2_FR_calf_joint
+      - b2_RL_hip_joint
+      - b2_RL_thigh_joint
+      - b2_RL_calf_joint
+      - b2_RR_hip_joint
+      - b2_RR_thigh_joint
+      - b2_RR_calf_joint
+    # PID (можно настроить по желанию)
+    # pid:
+    #   p: 100.0
+    #   i: 0.0
+    #   d: 10.0

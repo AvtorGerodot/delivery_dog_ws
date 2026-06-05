@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot name="b2_z1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- <material name="grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+    </material> -->
+
+    <!-- Подключаем макросы B2 и Z1 -->
+    <xacro:include filename="$(find b2_description)/xacro/b2_robot_macro.urdf.xacro"/>
+    <xacro:include filename="$(find z1_model)/urdf/z1_arm_macro.urdf.xacro"/>
+
+    <!-- Аргументы: положение и крепление Z1 на собаке -->
+    <!-- <xacro:arg name="b2_xyz" default="0 0 0"/>
+    <xacro:arg name="b2_rpy" default="0 0 0"/> -->
+    <xacro:arg name="mount_position" default="0.387 0 0.25"/> <!-- высота крепления Z1 над спиной -->
+
+
+    <!-- Вставляем собаку B2 (без ros2_control) -->
+    <xacro:b2_robot prefix="b2_"/> 
+    <!-- xyz="$(arg b2_xyz)" rpy="$(arg b2_rpy)" -->
+
+    <!-- Создаём отдельный линк для крепления Z1 -->
+    <link name="z1_mount"/>
+
+    <!-- Крепим монтажную площадку к trunk собаки (подбираем координаты) -->
+    <joint name="z1_mount_joint" type="fixed">
+    <origin xyz="$(arg mount_position)" rpy="0 0 0"/>
+    <parent link="b2_trunk"/>
+    <child link="z1_mount"/>
+    </joint>
+
+    <!-- Устанавливаем манипулятор Z1 на монтажную площадку -->
+    <xacro:z1_arm prefix="z1_"
+                parent="z1_mount"
+                xyz="0 0 0" rpy="0 0 0"
+                use_gripper="true"/>
+
+    <!-- Общий ros2_control блок для всех 19 суставов -->
+    <ros2_control name="B2Z1System" type="system">
+        <hardware>
+            <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </hardware>
+
+        <!-- Суставы B2 (12) -->
+        <xacro:b2_ros2_control_list prefix="b2_"/>
+
+        <!-- Суставы Z1 (7, включая схват) -->
+        <xacro:z1_ros2_control_list prefix="z1_" use_gripper="true"/>
+    </ros2_control>
+
+    <!-- Плагин gz_ros2_control (подключается один раз для всей модели) -->
+    <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="gz_ros2_control-system">
+        <parameters>$(find delivery_dog_bringup)/config/b2_z1_controllers.yaml</parameters>
+        <ros>
+        <arg name="use_sim_time" value="true"/>
+        </ros>
+    </plugin>
+    </gazebo>
+
+</robot>

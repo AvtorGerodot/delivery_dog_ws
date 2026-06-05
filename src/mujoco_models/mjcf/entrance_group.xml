@@ -1,0 +1,89 @@
+<mujoco model="entrance_group_v3">
+  <compiler angle="radian"/>
+
+  <worldbody>
+    <geom size="1 1.5 0.01" pos="0 0 0.0025" type="box" rgba="0.3 0.3 0.3 1"/>
+    <geom size="0.1 0.525 1.25" pos="0 0.975 1.2525" type="box" rgba="0.75 0.73 0.7 1"/>
+    <geom size="0.1 0.525 1.25" pos="0 -0.975 1.2525" type="box" rgba="0.75 0.73 0.7 1"/>
+    <geom size="0.1 0.45 0.2" pos="0 0 2.3025" type="box" rgba="0.75 0.73 0.7 1"/>
+    <geom size="0.0075 0.06 0.1" pos="0.1025 -0.75 1.4025" type="box" rgba="0.13 0.13 0.16 1"/>
+    <body name="door" pos="0.1 0.45 1.0525">
+      <inertial pos="-0.078666 -0.454387 0.000592885" quat="0.300127 0.30081 -0.639698 0.640487" mass="25.3" diaginertia="9.24574 9.24236 0.089873"/>
+      <joint name="door_hinge" pos="0 0 0" axis="0 0 1" range="0 1.57" actuatorfrcrange="-100 100" damping="3" frictionloss="1.5"/>
+      <geom size="0.02 0.45 1.05" pos="-0.08 -0.45 0" type="box" rgba="0.15 0.15 0.17 1"/>
+      <geom size="0.0125 0.15" pos="0.0325 -0.82 0.05" type="cylinder" rgba="0.78 0.78 0.82 1"/>
+    </body>
+    <body name="button_1" pos="0.1125 -0.768 1.4155">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_1_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_2" pos="0.1125 -0.75 1.4155">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_2_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_3" pos="0.1125 -0.732 1.4155">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_3_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_4" pos="0.1125 -0.768 1.3935">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_4_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_5" pos="0.1125 -0.75 1.3935">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_5_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_6" pos="0.1125 -0.732 1.3935">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_6_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_7" pos="0.1125 -0.768 1.3715">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_7_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_8" pos="0.1125 -0.75 1.3715">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_8_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_9" pos="0.1125 -0.732 1.3715">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_9_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_star" pos="0.1125 -0.768 1.3495">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_star_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_0" pos="0.1125 -0.75 1.3495">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_0_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+    <body name="button_hash" pos="0.1125 -0.732 1.3495">
+      <inertial pos="0.000386364 0 0" quat="0.5 0.5 0.5 0.5" mass="0.0055" diaginertia="1.0921e-07 1.0921e-07 1.01e-07"/>
+      <joint name="button_hash_joint" pos="0 0 0" axis="-1 0 0" type="slide" range="0 0.003" actuatorfrcrange="-20 20" damping="3" frictionloss="0.1"/>
+      <geom size="0.004 0.005 0.005" type="box" rgba="0.88 0.86 0.82 1"/>
+      <geom size="0.00025 0.00475 0.00475" pos="0.00425 0 0" type="box" rgba="0.95 0.94 0.9 1"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -12,22 +12,84 @@
     <!-- Аргументы: положение и крепление Z1 на собаке -->
     <!-- <xacro:arg name="b2_xyz" default="0 0 0"/>
     <xacro:arg name="b2_rpy" default="0 0 0"/> -->
-    <xacro:arg name="mount_position" default="0.35 0 0.275"/> <!-- высота крепления Z1 над спиной -->
+    <xacro:arg name="mount_position" default="0.1945 0 0.276"/> <!-- 0.361 высота крепления Z1 над спиной -->
 
 
     <!-- Вставляем собаку B2 (без ros2_control) -->
     <xacro:b2_robot prefix="b2_"/> 
     <!-- xyz="$(arg b2_xyz)" rpy="$(arg b2_rpy)" -->
 
+    <link name="bracket">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="$(find delivery_dog_bringup)/meshes/bracket2.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="iron_gold"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.128 0.16 0.185"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="-0.1945 0 0.1805"/>
+        </collision>
+        <inertial>
+            <origin xyz="0.194501 0.0 0.174264" rpy="0 0 0"/>
+            <mass value="3.603948"/>
+            <inertia ixx="0.031873" ixy="0.0" ixz="0.0" iyy="0.022245" iyz="0.0" izz="0.019470"/>
+        </inertial>
+    </link>
+
+    <joint name="bracket_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="b2_trunk"/>
+        <child link="bracket"/>
+    </joint>
+
+
+    <link name="delivery_box">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.395 0.32 0.26"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.395 0.32 0.26"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <mass value="15.0"/>
+            <inertia ixx="0.1845" ixy="0.0" ixz="0.0" iyy="0.247781" iyz="0.0" izz="0.288281"/>
+        </inertial>
+    </link>
+
+    <joint name="delivery_box_joint" type="fixed">
+        <origin rpy="0 0 0" xyz="-0.28 0 0.22"/>
+        <parent link="b2_trunk"/>
+        <child link="delivery_box"/>
+    </joint>
+
+
     <!-- Создаём отдельный линк для крепления Z1 -->
     <link name="z1_mount"/>
 
     <!-- Крепим монтажную площадку к trunk собаки (подбираем координаты) -->
     <joint name="z1_mount_joint" type="fixed">
-    <origin xyz="$(arg mount_position)" rpy="0 0 0"/>
-    <parent link="b2_trunk"/>
-    <child link="z1_mount"/>
+        <origin xyz="$(arg mount_position)" rpy="0 0 0"/>
+        <parent link="b2_trunk"/>
+        <child link="z1_mount"/>
     </joint>
+    <!-- <joint name="z1_mount_joint" type="fixed">
+        <origin xyz="0 0 0.0925" rpy="0 0 0"/>
+        <parent link="bracket"/>
+        <child link="z1_mount"/>
+    </joint> -->
+
 
     <!-- Устанавливаем манипулятор Z1 на монтажную площадку -->
     <xacro:z1_arm prefix="z1_"
